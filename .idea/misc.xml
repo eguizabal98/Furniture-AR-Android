@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/elias/AndroidStudioProjects/FurnitureApp/app/src/main/res/drawable/ic_anchor.xml" value="0.1175" />
+        <entry key="..\:/Users/elias/AndroidStudioProjects/FurnitureApp/app/src/main/res/layout/fragment_main.xml" value="0.1" />
+        <entry key="..\:/Users/elias/AndroidStudioProjects/FurnitureApp/app/src/main/res/layout/second_library.xml" value="0.18" />
+        <entry key="..\:/Users/elias/AndroidStudioProjects/FurnitureApp/app/src/main/res/layout/view_renderable_infos.xml" value="0.17074275362318841" />
         <entry key="..\:/Users/elias/FurnitureApp/app/src/main/res/drawable/ic_anchor.xml" value="0.1" />
         <entry key="..\:/Users/elias/FurnitureApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
         <entry key="..\:/Users/elias/FurnitureApp/app/src/main/res/drawable/ic_reset.xml" value="0.1175" />
