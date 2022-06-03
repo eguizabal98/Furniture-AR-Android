@@ -5,9 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.eem.furnitureapp.R
+import com.eem.furnitureapp.loadViewRender
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.slider.Slider
 import com.google.ar.core.Anchor
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.node.ArModelNode
@@ -21,18 +24,15 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     lateinit var sceneView: ArSceneView
     lateinit var loadingView: View
     lateinit var actionButton: ExtendedFloatingActionButton
-    lateinit var lessX: FloatingActionButton
-    lateinit var lessY: FloatingActionButton
-    lateinit var lessZ: FloatingActionButton
-
-    lateinit var moreX: FloatingActionButton
-    lateinit var moreY: FloatingActionButton
-    lateinit var moreZ: FloatingActionButton
+    lateinit var lessX: Slider
+    lateinit var lessY: Slider
+    lateinit var lessZ: Slider
 
     lateinit var changeModelBtn: FloatingActionButton
 
     lateinit var cursorNode: CursorNode
     lateinit var modelNode: ArModelNode
+    lateinit var layoutNode: ArModelNode
 
     var isLoading = false
         set(value) {
@@ -46,53 +46,33 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         loadingView = view.findViewById(R.id.loadingView)
 
-        lessX = view.findViewById<FloatingActionButton>(R.id.fab_lessX)
+        lessX = view.findViewById<Slider>(R.id.pgb_x)
             .apply {
-                setOnClickListener {
-                    this@MainFragment.rotationX -= 5
+                addOnChangeListener { slider, value, fromUser ->
+                    this@MainFragment.rotationX = value
                     lastAnchor?.let { anchor -> anchorOrMove(anchor) }
                 }
             }
-        lessY = view.findViewById<FloatingActionButton>(R.id.fab_lessY)
+        lessY = view.findViewById<Slider>(R.id.pgb_y)
             .apply {
-                setOnClickListener {
-                    this@MainFragment.rotationY -= 5
+                addOnChangeListener { slider, value, fromUser ->
+                    this@MainFragment.rotationY = value
                     lastAnchor?.let { anchor -> anchorOrMove(anchor) }
                 }
             }
-        lessZ = view.findViewById<FloatingActionButton>(R.id.fab_lessZ)
+        lessZ = view.findViewById<Slider>(R.id.pgb_z)
             .apply {
-                setOnClickListener {
-                    this@MainFragment.rotationZ -= 5
-                    lastAnchor?.let { anchor -> anchorOrMove(anchor) }
-                }
-            }
-
-        moreX = view.findViewById<FloatingActionButton>(R.id.fab_moreX)
-            .apply {
-                setOnClickListener {
-                    this@MainFragment.rotationX += 5
-                    lastAnchor?.let { anchor -> anchorOrMove(anchor) }
-                }
-            }
-        moreY = view.findViewById<FloatingActionButton>(R.id.fab_moreY)
-            .apply {
-                setOnClickListener {
-                    this@MainFragment.rotationY += 5
-                    lastAnchor?.let { anchor -> anchorOrMove(anchor) }
-                }
-            }
-        moreZ = view.findViewById<FloatingActionButton>(R.id.fab_moreZ)
-            .apply {
-                setOnClickListener {
-                    this@MainFragment.rotationZ += 5
+                addOnChangeListener { slider, value, fromUser ->
+                    this@MainFragment.rotationZ = value
                     lastAnchor?.let { anchor -> anchorOrMove(anchor) }
                 }
             }
 
         changeModelBtn = view.findViewById<FloatingActionButton>(R.id.fab_change_model).apply {
             setOnClickListener {
-                passModel()
+                lifecycleScope.launchWhenCreated {
+                    passModel()
+                }
             }
         }
 
@@ -116,9 +96,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 modelNode.scaleModel(units = 1.0f)
                 sceneView.addChild(modelNode)
             }
-            onTouchAr = { hitResult, _ ->
-                anchorOrMove(hitResult.createAnchor())
-            }
+//            onTouchAr = { hitResult, _ ->
+//                anchorOrMove(hitResult.createAnchor())
+//            }
         }
 
         cursorNode = CursorNode(context = requireContext(), lifecycle = lifecycle).apply {
@@ -131,13 +111,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         sceneView.addChild(cursorNode)
         isLoading = true
         modelNode = ArModelNode()
-        passModel()
+        layoutNode = ArModelNode()
+        lifecycleScope.launchWhenCreated {
+            passModel()
+        }
     }
 
-    private val modelList = listOf("models/char2.gltf", "models/chair2.glb")
+    private val modelList = listOf("models/char2.glb", "models/chair2.glb")
     private var actualModel = 1
 
-    private fun passModel() {
+    private suspend fun passModel() {
         modelNode.loadModelAsync(context = requireContext(),
             lifecycle = lifecycle,
             glbFileLocation = modelList[actualModel],
@@ -146,6 +129,18 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 actionButton.setIconResource(R.drawable.ic_target)
                 isLoading = false
             })
+
+        layoutNode.apply {
+            position = Position(y = 1f)
+            loadViewRender(
+                context = requireContext(),
+                lifecycle = lifecycle,
+                layoutSrc = R.layout.view_renderable_infos
+            )
+        }
+
+        modelNode.addChild(layoutNode)
+
         actualModel = if (actualModel + 1 >= modelList.size) 0 else (actualModel + 1)
     }
 
