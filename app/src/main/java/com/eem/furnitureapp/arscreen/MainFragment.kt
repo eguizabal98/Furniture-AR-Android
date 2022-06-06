@@ -3,11 +3,24 @@ package com.eem.furnitureapp.arscreen
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy.*
+import androidx.compose.ui.unit.dp
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.eem.furnitureapp.R
 import com.eem.furnitureapp.loadViewRender
+import com.eem.furnitureapp.model.Furniture
+import com.eem.furnitureapp.ui.theme.FurnitureAppTheme
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.slider.Slider
@@ -27,12 +40,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     lateinit var lessX: Slider
     lateinit var lessY: Slider
     lateinit var lessZ: Slider
-
-    lateinit var changeModelBtn: FloatingActionButton
+    lateinit var composeView: ComposeView
 
     lateinit var cursorNode: CursorNode
     lateinit var modelNode: ArModelNode
     lateinit var layoutNode: ArModelNode
+
+    private val furnitureList = listOf(
+        Furniture("Sandy Chair", "4.5", "75.0", R.drawable.chair_a, "models/chair_a.glb"),
+        Furniture("Big Chair", "5.0", "125.0", R.drawable.chair_b, "models/chair_b.glb"),
+    )
 
     var isLoading = false
         set(value) {
@@ -43,6 +60,31 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        composeView = view.findViewById(R.id.compose_view)
+
+        composeView.apply {
+            // Dispose of the Composition when the view's LifecycleOwner
+            // is destroyed
+            setViewCompositionStrategy(DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                // In Compose world
+                FurnitureAppTheme {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize(), state = rememberLazyListState()
+                    ) {
+                        items(items = furnitureList) { furniture ->
+                            FurnitureItem(
+                                Modifier,
+                                furniture
+                            ) { passModel(furniture.modelPath) }
+                        }
+                    }
+                }
+            }
+        }
 
         loadingView = view.findViewById(R.id.loadingView)
 
@@ -67,14 +109,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     lastAnchor?.let { anchor -> anchorOrMove(anchor) }
                 }
             }
-
-        changeModelBtn = view.findViewById<FloatingActionButton>(R.id.fab_change_model).apply {
-            setOnClickListener {
-                lifecycleScope.launchWhenCreated {
-                    passModel()
-                }
-            }
-        }
 
         actionButton = view.findViewById<ExtendedFloatingActionButton>(R.id.actionButton).apply {
             val bottomMargin = (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
@@ -112,18 +146,15 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         isLoading = true
         modelNode = ArModelNode()
         layoutNode = ArModelNode()
-        lifecycleScope.launchWhenCreated {
-            passModel()
-        }
     }
 
-    private val modelList = listOf("models/char2.glb", "models/chair2.glb")
+    private val modelList = listOf("models/chair_b.glb", "models/chair_a.glb")
     private var actualModel = 1
 
-    private suspend fun passModel() {
+    private fun passModel(modelPath: String) {
         modelNode.loadModelAsync(context = requireContext(),
             lifecycle = lifecycle,
-            glbFileLocation = modelList[actualModel],
+            glbFileLocation = modelPath,
             onLoaded = {
                 actionButton.text = getString(R.string.move_object)
                 actionButton.setIconResource(R.drawable.ic_target)

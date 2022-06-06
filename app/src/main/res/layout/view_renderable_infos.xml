@@ -4,22 +4,10 @@
     android:background="#14000000"
     android:orientation="vertical">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:src="@drawable/halloween" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:text="Halloween is a celebration observed in many countries on 31 October"
+        android:text="Layout Example to show Info. XML layout to 3D view"
         android:textColor="@android:color/white" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button Test Click"/>
 </LinearLayout>

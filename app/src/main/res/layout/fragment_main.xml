@@ -20,7 +20,8 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:valueFrom="0.0"
-            android:valueTo="360.0" />
+            android:valueTo="360.0"
+            android:visibility="gone" />
 
         <com.google.android.material.slider.Slider
             android:id="@+id/pgb_y"
@@ -35,18 +36,9 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:valueFrom="0.0"
-            android:valueTo="360.0" />
+            android:valueTo="360.0"
+            android:visibility="gone" />
     </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_change_model"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:src="@drawable/ic_reset"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <io.github.sceneview.ar.ArSceneView
         android:id="@+id/sceneView"
@@ -62,7 +54,7 @@
         android:id="@+id/actionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
         android:backgroundTint="@color/translucent"
         android:gravity="center_vertical|left"
         android:text="@string/place_object"
@@ -71,7 +63,7 @@
         app:icon="@drawable/ic_anchor"
         app:iconGravity="textStart"
         app:iconTint="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/compose_view"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
@@ -94,4 +86,14 @@
             app:indicatorSize="64dp"
             app:trackColor="#3FFFFFFF" />
     </FrameLayout>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:elevation="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
