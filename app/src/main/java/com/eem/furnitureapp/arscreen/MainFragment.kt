@@ -22,11 +22,13 @@ import com.eem.furnitureapp.ui.theme.FurnitureAppTheme
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.slider.Slider
 import com.google.ar.core.Anchor
+import com.google.ar.core.Config
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.node.ArModelNode
 import io.github.sceneview.ar.node.CursorNode
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
+import io.github.sceneview.math.Scale
 import io.github.sceneview.utils.doOnApplyWindowInsets
 
 class MainFragment : Fragment(R.layout.fragment_main) {
@@ -37,6 +39,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     lateinit var lessX: Slider
     lateinit var lessY: Slider
     lateinit var lessZ: Slider
+    lateinit var scale: Slider
     lateinit var composeView: ComposeView
 
     lateinit var cursorNode: CursorNode
@@ -106,6 +109,13 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     lastAnchor?.let { anchor -> anchorOrMove(anchor) }
                 }
             }
+        scale = view.findViewById<Slider>(R.id.pgb_scale)
+            .apply {
+                addOnChangeListener { slider, value, fromUser ->
+                    this@MainFragment.scaleM = value
+                    lastAnchor?.let { anchor -> anchorOrMove(anchor) }
+                }
+            }
 
         actionButton = view.findViewById<ExtendedFloatingActionButton>(R.id.actionButton).apply {
             val bottomMargin = (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
@@ -126,6 +136,13 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 modelNode.centerModel(origin = Position(x = 0.0f, y = 0.0f, z = 0.0f))
                 modelNode.scaleModel(units = 1.0f)
                 sceneView.addChild(modelNode)
+            }
+
+            onArSessionCreated = {
+                if (it.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                    sceneView.depthEnabled = true
+                    sceneView.isDepthOcclusionEnabled = true
+                }
             }
 //            onTouchAr = { hitResult, _ ->
 //                anchorOrMove(hitResult.createAnchor())
@@ -178,11 +195,13 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             sceneView.addChild(modelNode)
         }
         modelNode.anchor = anchor
+        modelNode.scale = Scale(scaleM)
         modelNode.modelRotation = Rotation(x = rotationX, y = rotationY, z = rotationZ)
     }
 
     var rotationX = 0f
     var rotationY = 0f
     var rotationZ = 0f
+    var scaleM = 0.5f
     var lastAnchor: Anchor? = null
 }
